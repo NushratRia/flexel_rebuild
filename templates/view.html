@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Spreadsheet Viewer</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@14.0.0/dist/handsontable.min.css">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #fff;
+      font-family: "Roboto", sans-serif;
+    }
+
+    .sheet-container {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .sheet-toolbar {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      color: #444;
+      padding: 0 10px;
+      border-bottom: 1px solid #ddd;
+      background: #f8f9fa;
+    }
+
+    #hot {
+      flex: 1;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+
+<div class="sheet-container">
+  <div class="sheet-toolbar">
+    🗂 {{ sheet_name }}
+  </div>
+  <div id="hot"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/handsontable@14.0.0/dist/handsontable.min.js"></script>
+<!--script>
+  // Convert column index to Excel-style labels: A, B, ..., Z, AA, AB, ...
+  function getExcelColumnLabel(index) {
+    let label = '';
+    while (index >= 0) {
+      label = String.fromCharCode((index % 26) + 65) + label;
+      index = Math.floor(index / 26) - 1;
+    }
+    return label;
+  }
+
+  const originalData = {{ data|tojson }};
+  const originalHeaders = {{ headers|tojson }};
+  const columnCount = Math.max(originalHeaders.length + 10, 26);  // pad with 10 more cols
+  const rowCount = Math.max(originalData.length + 20, 40);        // pad with 20 more rows
+
+  // Build full data grid with empty cells
+  const fullData = Array.from({ length: rowCount }, (_, r) =>
+    Array.from({ length: columnCount }, (_, c) =>
+      (originalData[r] && originalData[r][c]) ? originalData[r][c] : ''
+    )
+  );
+
+  const colHeaders = Array.from({ length: columnCount }, (_, i) => getExcelColumnLabel(i));
+
+  const container = document.getElementById('hot');
+  const hot = new Handsontable(container, {
+    data: fullData,
+    colHeaders: colHeaders,
+    rowHeaders: true,
+    licenseKey: 'non-commercial-and-evaluation',
+    filters: true,
+    dropdownMenu: true,
+    contextMenu: true,
+    manualColumnResize: true,
+    manualRowResize: true,
+    height: '100%',
+    width: '100%',
+    stretchH: 'all',
+    autoWrapRow: true,
+    autoWrapCol: true
+  });
+</script-->
+
+<script>
+  // Excel-style column labels
+  function getExcelColumnLabel(index) {
+    let label = '';
+    while (index >= 0) {
+      label = String.fromCharCode((index % 26) + 65) + label;
+      index = Math.floor(index / 26) - 1;
+    }
+    return label;
+  }
+
+  const originalHeaders = {{ headers|tojson }};
+  const originalData = {{ data|tojson }};
+
+  // Combine header row with data (row 1 is your actual headers)
+  const allRows = [originalHeaders, ...originalData];
+
+  // Add 20 extra rows
+  const totalRows = allRows.length + 20;
+  const totalCols = Math.max(originalHeaders.length + 10, 26);
+
+  const fullData = Array.from({ length: totalRows }, (_, r) =>
+    Array.from({ length: totalCols }, (_, c) =>
+      (allRows[r] && allRows[r][c]) ? allRows[r][c] : ''
+    )
+  );
+
+  const colHeaders = Array.from({ length: totalCols }, (_, i) => getExcelColumnLabel(i));
+
+  const container = document.getElementById('hot');
+  const hot = new Handsontable(container, {
+    data: fullData,
+    colHeaders: colHeaders,
+    rowHeaders: true,
+    licenseKey: 'non-commercial-and-evaluation',
+    filters: true,
+    dropdownMenu: true,
+    contextMenu: true,
+    manualColumnResize: true,
+    manualRowResize: true,
+    height: '100%',
+    width: '100%',
+    stretchH: 'all',
+    autoWrapRow: true,
+    autoWrapCol: true,
+    fixedRowsTop: 1  // Freeze the first row (your original headers)
+  });
+</script>
+
+
+</body>
+</html>
