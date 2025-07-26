@@ -38,6 +38,30 @@
       flex: 1;
       overflow: hidden;
     }
+
+    .menu-bar {
+      display: flex;
+      gap: 20px;
+      padding: 2px 15px;
+      padding-top: 1px;
+      background-color: #f1f3f4;
+      border-bottom: 1px solid #ccc;
+      font-size: 14px;
+      font-weight: 500;
+      color: #222;
+      user-select: none;
+    }
+
+    .menu-bar span {
+      cursor: pointer;
+    }
+
+    .menu-bar span:hover {
+      text-decoration: underline;
+    }
+
+    
+
   </style>
 </head>
 <body>
@@ -46,8 +70,21 @@
   <div class="sheet-toolbar">
     🗂 <div id="editableTitle" contenteditable="true">{{ sheet_name }}</div>
   </div>
+    <div class="menu-bar">
+    <span onclick="menuAction('File')">File</span>
+    <span onclick="menuAction('Edit')">Edit</span>
+    <span onclick="menuAction('View')">View</span>
+    <span onclick="menuAction('Insert')">Insert</span>
+    <span onclick="menuAction('Format')">Format</span>
+    <span onclick="menuAction('Data')">Data</span>
+    <span onclick="menuAction('Tools')">Tools</span>
+    <span onclick="menuAction('Extensions')">Extensions</span>
+    <span onclick="menuAction('Help')">Help</span>
+  </div>
+
   <div id="hot"></div>
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/handsontable@14.0.0/dist/handsontable.min.js"></script>
 
@@ -105,6 +142,8 @@
     contextMenu: true,
     manualColumnResize: true,
     manualRowResize: true,
+    rowHeights: 60,
+    colWidths: 120,
     height: '100%',
     width: '100%',
     stretchH: 'all',
@@ -112,6 +151,13 @@
     autoWrapCol: true,
     fixedRowsTop: 1  // Freeze the first row (your original headers)
   });
+
+
+  function menuAction(name) {
+    console.log(`${name} menu clicked`);
+    // Later: Show dropdowns or modals if needed
+  }
+
 </script>
 
 
