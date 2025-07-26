@@ -3,21 +3,29 @@ import requests
 import csv
 import io
 import re
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
 
 app = Flask(__name__)
 
-def get_sheet_name(sheet_id, gid):
+
+
+def get_sheet_name(sheet_id, gid, api_key):
     try:
-        url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/edit#gid={gid}"
+        url = f"https://sheets.googleapis.com/v4/spreadsheets/{sheet_id}?fields=sheets.properties&key={api_key}"
         response = requests.get(url)
         response.raise_for_status()
-        html = response.text
+        data = response.json()
 
-        match = re.search(r'"gid":' + gid + r'.*?"title":"(.*?)"', html)
-        if match:
-            return match.group(1)
-    except:
-        pass
+        for sheet in data["sheets"]:
+            props = sheet["properties"]
+            if str(props["sheetId"]) == str(gid):
+                return props["title"]
+    except Exception as e:
+        print("Sheet name fetch error:", e)
     return "Untitled Sheet"
 
 
@@ -43,74 +51,26 @@ def view_sheet():
 
 
 
-
-
-# @app.route('/view')
-# def view_sheet():
-#     csv_url = request.args.get('csv_url')
-#     if not csv_url:
-#         return "Missing sheet URL."
-
-#     try:
-#         response = requests.get(csv_url)
-#         response.raise_for_status()
-#         f = io.StringIO(response.text)
-#         reader = list(csv.reader(f))
-#         headers = reader[0]
-#         data = reader[1:]
-#         return render_template('view.html', headers=headers, data=data)
-#     except Exception as e:
-#         return f"Failed to load sheet: {e}"
-    
-    
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
         sheet_url = request.form['sheet_url']
 
-        # Extract Sheet ID
         match = re.search(r'/d/([a-zA-Z0-9-_]+)', sheet_url)
         if not match:
             return "Invalid Google Sheets URL."
         sheet_id = match.group(1)
 
-        # Extract gid (if present), otherwise default to 0
         gid_match = re.search(r'gid=([0-9]+)', sheet_url)
         gid = gid_match.group(1) if gid_match else '0'
 
-        # Construct export link
+        #  Get correct sheet name from API
+        sheet_name = get_sheet_name(sheet_id, gid, API_KEY)
+
         csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
-        sheet_name = get_sheet_name(sheet_id, gid)
         return redirect(url_for('view_sheet', csv_url=csv_url, sheet_name=sheet_name))
 
-
     return render_template('index.html')
-
-
-
-    
-    
-# @app.route('/', methods=['GET', 'POST'])
-# def index():
-#     if request.method == 'POST':
-#         sheet_url = request.form['sheet_url']
-
-#         # Extract Sheet ID
-#         match = re.search(r'/d/([a-zA-Z0-9-_]+)', sheet_url)
-#         if not match:
-#             return "Invalid Google Sheets URL."
-#         sheet_id = match.group(1)
-
-#         # Extract gid (if present), otherwise default to 0
-#         gid_match = re.search(r'gid=([0-9]+)', sheet_url)
-#         gid = gid_match.group(1) if gid_match else '0'
-
-#         # Construct export link
-#         csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
-#         return redirect(url_for('view_sheet', csv_url=csv_url))
-
-#     return render_template('index.html')
 
 
 
