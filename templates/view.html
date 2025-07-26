@@ -23,12 +23,13 @@
     }
 
     .sheet-toolbar {
-      height: 40px;
+      height: 50px;
       display: flex;
       align-items: center;
-      font-size: 14px;
-      color: #444;
-      padding: 0 10px;
+      font-size: 20px;
+      font-weight: bold; 
+      color: #333;
+      padding: 0 16px;
       border-bottom: 1px solid #ddd;
       background: #f8f9fa;
     }
@@ -43,57 +44,28 @@
 
 <div class="sheet-container">
   <div class="sheet-toolbar">
-    🗂 {{ sheet_name }}
+    🗂 <div id="editableTitle" contenteditable="true">{{ sheet_name }}</div>
   </div>
   <div id="hot"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/handsontable@14.0.0/dist/handsontable.min.js"></script>
-<!--script>
-  // Convert column index to Excel-style labels: A, B, ..., Z, AA, AB, ...
-  function getExcelColumnLabel(index) {
-    let label = '';
-    while (index >= 0) {
-      label = String.fromCharCode((index % 26) + 65) + label;
-      index = Math.floor(index / 26) - 1;
-    }
-    return label;
-  }
 
-  const originalData = {{ data|tojson }};
-  const originalHeaders = {{ headers|tojson }};
-  const columnCount = Math.max(originalHeaders.length + 10, 26);  // pad with 10 more cols
-  const rowCount = Math.max(originalData.length + 20, 40);        // pad with 20 more rows
-
-  // Build full data grid with empty cells
-  const fullData = Array.from({ length: rowCount }, (_, r) =>
-    Array.from({ length: columnCount }, (_, c) =>
-      (originalData[r] && originalData[r][c]) ? originalData[r][c] : ''
-    )
-  );
-
-  const colHeaders = Array.from({ length: columnCount }, (_, i) => getExcelColumnLabel(i));
-
-  const container = document.getElementById('hot');
-  const hot = new Handsontable(container, {
-    data: fullData,
-    colHeaders: colHeaders,
-    rowHeaders: true,
-    licenseKey: 'non-commercial-and-evaluation',
-    filters: true,
-    dropdownMenu: true,
-    contextMenu: true,
-    manualColumnResize: true,
-    manualRowResize: true,
-    height: '100%',
-    width: '100%',
-    stretchH: 'all',
-    autoWrapRow: true,
-    autoWrapCol: true
-  });
-</script-->
 
 <script>
+  const titleDiv = document.getElementById('editableTitle');
+
+  titleDiv.addEventListener('focus', () => {
+    titleDiv.style.outline = '1px dashed #888';
+  });
+
+  titleDiv.addEventListener('blur', () => {
+    titleDiv.style.outline = 'none';
+    console.log("Updated sheet name:", titleDiv.innerText.trim());
+    // Optionally send to backend with fetch() or save locally
+  });
+
+
   // Excel-style column labels
   function getExcelColumnLabel(index) {
     let label = '';
