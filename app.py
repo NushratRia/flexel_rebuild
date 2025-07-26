@@ -13,20 +13,16 @@ app = Flask(__name__)
 
 
 
-def get_sheet_name(sheet_id, gid, api_key):
+def get_spreadsheet_title(sheet_id, api_key):
     try:
-        url = f"https://sheets.googleapis.com/v4/spreadsheets/{sheet_id}?fields=sheets.properties&key={api_key}"
+        url = f"https://sheets.googleapis.com/v4/spreadsheets/{sheet_id}?fields=properties.title&key={api_key}"
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
-
-        for sheet in data["sheets"]:
-            props = sheet["properties"]
-            if str(props["sheetId"]) == str(gid):
-                return props["title"]
+        return data['properties']['title']
     except Exception as e:
-        print("Sheet name fetch error:", e)
-    return "Untitled Sheet"
+        print("Title fetch error:", e)
+    return "Untitled Spreadsheet"
 
 
 
@@ -65,10 +61,12 @@ def index():
         gid = gid_match.group(1) if gid_match else '0'
 
         #  Get correct sheet name from API
-        sheet_name = get_sheet_name(sheet_id, gid, API_KEY)
+        # sheet_name = get_sheet_name(sheet_id, gid, API_KEY)
+        spreadsheet_title = get_spreadsheet_title(sheet_id, API_KEY)
+
 
         csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
-        return redirect(url_for('view_sheet', csv_url=csv_url, sheet_name=sheet_name))
+        return redirect(url_for('view_sheet', csv_url=csv_url, sheet_name=spreadsheet_title))
 
     return render_template('index.html')
 
